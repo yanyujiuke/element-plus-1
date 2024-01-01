@@ -1,0 +1,51 @@
+version: "3.8"
+services:
+    nginx:
+        image: nginx:1.18.0
+        ports:
+            - "80:80"
+        volumes:
+            - "./docker/nginx/nginx.conf:/etc/nginx/nginx.conf"
+            - "./docker/nginx/conf.d:/etc/nginx/conf.d"
+            - "./docker/nginx/log:/var/log/nginx"
+            - ".:/usr/share/nginx/html"
+    php:
+        image: bitnami/php-fpm:8.1.20
+        volumes:
+            - "./docker/php/php.ini:/usr/local/etc/php/php.ini"
+            - "./docker/php/php-fpm.conf:/usr/local/etc/php-fpm.conf"
+            - "./docker/php/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf"
+            - ".:/usr/share/nginx/html"
+        command: sh -c "/bin/sh /usr/share/nginx/html/docker/run.test.sh"
+        # command: sh -c "php-fpm -R"
+    mysql:
+        image: mysql:8.0.23
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: "123456"
+            MYSQL_ROOT_HOST: "%"
+        volumes:
+            - "./docker/mysql/data:/var/lib/mysql"
+            - "./docker/mysql/conf:/etc/mysql/conf.d"
+#    minio:
+#        image: minio/minio:latest                                    # 原镜像`minio/minio:latest`
+#        container_name: minio                                        # 容器名为'minio'
+#        volumes: # 数据卷挂载路径设置,将本机目录映射到容器目录
+#            - "./docker/minio/data:/minioData"
+#            - "./docker/minio/minio:/minio"
+#            - "./docker/minio/config:/root/.minio"
+#        environment: # 设置环境变量,相当于docker run命令中的-e
+#            TZ: Asia/Shanghai
+#            LANG: en_US.UTF-8
+#            MINIO_PROMETHEUS_AUTH_TYPE: "public"
+#            MINIO_ROOT_USER: "root"                        # 登录账号
+#            MINIO_ROOT_PASSWORD: "password"                    # 登录密码
+#        command: server /minioData --console-address ":9001"
+#        logging:
+#            driver: "json-file"
+#            options:
+#                max-size: "100m"
+#        ports: # 映射端口
+#            - "9000:9000"
+#            - "9001:9001"
